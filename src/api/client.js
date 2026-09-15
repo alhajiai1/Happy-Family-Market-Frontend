@@ -16,11 +16,16 @@ export async function apiRequest(path, { method = 'GET', body, auth = true, head
     if (token) finalHeaders['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers: finalHeaders,
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  let res;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers: finalHeaders,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (networkErr) {
+    throw new Error('Could not reach the server. Check your internet connection and try again.');
+  }
 
   let data = null;
   try { data = await res.json(); } catch {}
