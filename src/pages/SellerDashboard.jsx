@@ -28,7 +28,10 @@ export default function SellerDashboard() {
     <main className="page">
       <div className="section-head">
         <h1>My Shop</h1>
-        <Link to="/seller/new" className="primary-btn small">+ New Listing</Link>
+        <div>
+          <Link to="/seller/bank-details" className="link-btn">Payout Details</Link>
+          <Link to="/seller/new" className="primary-btn small">+ New Listing</Link>
+        </div>
       </div>
 
       {loading && <p>Loading your listings...</p>}
