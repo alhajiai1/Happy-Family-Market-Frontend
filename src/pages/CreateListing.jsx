@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createProduct, updateProduct, fetchProductById } from '../api/products';
+import { uploadProductImages } from '../utils/uploadProductImages';
 
-const emptyForm = { title: '', description: '', price: '', category: '', stock: '', imageUrl: '' };
+const emptyForm = { title: '', description: '', price: '', category: '', stock: '' };
 
 export default function CreateListing() {
   const { id } = useParams();
@@ -10,37 +11,66 @@ export default function CreateListing() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState(emptyForm);
+  const [files, setFiles] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
-      fetchProductById(id).then((p) =>
+      fetchProductById(id).then((p) => {
         setForm({
           title: p.title,
           description: p.description,
           price: p.price,
           category: p.category,
           stock: p.stock,
-          imageUrl: p.imageUrl || '',
-        })
-      );
+        });
+        setExistingImages(p.images || []);
+      });
     }
   }, [id, isEditing]);
+
+  function handleFileChange(e) {
+    const selected = Array.from(e.target.files || []);
+    const totalCount = existingImages.length + selected.length;
+    if (totalCount > 8) {
+      setError('You can add up to 8 images total.');
+      return;
+    }
+    setError('');
+    setFiles(selected);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     setSubmitting(true);
     try {
-      const payload = { ...form, price: Number(form.price), stock: Number(form.stock) };
+      let imageUrls = [];
+      if (files.length > 0) {
+        setUploading(true);
+        imageUrls = await uploadProductImages(files);
+        setUploading(false);
+      }
+
+      const payload = {
+        ...form,
+        price: Number(form.price),
+        stock: Number(form.stock),
+        images: imageUrls,
+      };
+
       if (isEditing) await updateProduct(id, payload);
       else await createProduct(payload);
+
       navigate('/seller/dashboard');
     } catch (err) {
       setError(err.message || 'Could not save listing');
     } finally {
       setSubmitting(false);
+      setUploading(false);
     }
   }
 
@@ -77,12 +107,24 @@ export default function CreateListing() {
         </label>
 
         <label>
-          Image URL
-          <input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." />
+          Photos (up to 8)
+          <input type="file" accept="image/*" multiple onChange={handleFileChange} />
         </label>
 
-        <button type="submit" className="primary-btn" disabled={submitting}>
-          {submitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Listing'}
+        {existingImages.length > 0 && (
+          <div className="image-preview-row">
+            {existingImages.map((img) => (
+              <img key={img.id} src={img.imageUrl} alt="Existing" className="image-preview-thumb" />
+            ))}
+          </div>
+        )}
+
+        {files.length > 0 && (
+          <p className="upload-note">{files.length} new photo{files.length === 1 ? '' : 's'} selected</p>
+        )}
+
+        <button type="submit" className="primary-btn" disabled={submitting || uploading}>
+          {uploading ? 'Uploading photos...' : submitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Listing'}
         </button>
       </form>
     </main>

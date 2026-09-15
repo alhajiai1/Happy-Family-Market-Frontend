@@ -27,3 +27,11 @@ export function deleteProduct(id) {
 export function fetchMyListings() {
   return apiRequest('/api/products/mine', { method: 'GET' });
 }
+
+export function addProductImages(id, images) {
+  return apiRequest(`/api/products/${id}/images`, { method: 'POST', body: { images } });
+}
+
+export function deleteProductImage(id, imageId) {
+  return apiRequest(`/api/products/${id}/images/${imageId}`, { method: 'DELETE' });
+}
