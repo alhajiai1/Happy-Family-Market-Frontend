@@ -41,7 +41,7 @@ export default function Navbar() {
                 🛒 Cart
                 {itemCount > 0 && <span className="cart-count">{itemCount}</span>}
               </Link>
-              <span className="nav-link">Hi, {user.name?.split(' ')[0]}</span>
+              <Link to="/account" className="nav-link">Hi, {user.name?.split(' ')[0]}</Link>
               <button className="nav-link" onClick={logout}>Logout</button>
             </>
           ) : (

@@ -14,6 +14,8 @@ import Checkout from './pages/Checkout';
 import PaymentCallback from './pages/PaymentCallback';
 import SellerDashboard from './pages/SellerDashboard';
 import CreateListing from './pages/CreateListing';
+import SellerBankDetails from './pages/SellerBankDetails';
+import Account from './pages/Account';
 
 export default function App() {
   return (
@@ -30,6 +32,14 @@ export default function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment/callback" element={<PaymentCallback />} />
 
+            <Route
+              path="/account"
+              element={
+                <ProtectedRoute>
+                  <Account />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/checkout"
               element={
@@ -59,6 +69,14 @@ export default function App() {
               element={
                 <ProtectedRoute requireRole="seller">
                   <CreateListing />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/seller/bank-details"
+              element={
+                <ProtectedRoute requireRole="seller">
+                  <SellerBankDetails />
                 </ProtectedRoute>
               }
             />
